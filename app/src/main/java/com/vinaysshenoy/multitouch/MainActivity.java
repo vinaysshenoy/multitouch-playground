@@ -31,13 +31,13 @@ public class MainActivity extends AppCompatActivity {
         controlPanel.findViewById(R.id.btn_square).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playgroundView.addShape(new Square(48F));
+                playgroundView.addShape(new Square(128F));
             }
         });
         controlPanel.findViewById(R.id.btn_triangle).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                playgroundView.addShape(new Triangle(72F));
+                playgroundView.addShape(new Triangle(128F));
             }
         });
     }
