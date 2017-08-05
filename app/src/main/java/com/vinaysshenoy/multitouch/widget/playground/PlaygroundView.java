@@ -3,8 +3,11 @@ package com.vinaysshenoy.multitouch.widget.playground;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -18,6 +21,17 @@ public class PlaygroundView extends View {
 
     private List<Shape> shapes;
     private Matrix matrix;
+    private Matrix operationsMatrix;
+
+    private TouchState touchState;
+
+    private Shape currentTouchedShape;
+
+    private PointF prevTouchPoint;
+    private PointF curTouchPoint;
+
+    private RectF sourceRect;
+    private RectF mappedRect;
 
     public PlaygroundView(Context context) {
         super(context);
@@ -40,8 +54,20 @@ public class PlaygroundView extends View {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        this.shapes = new ArrayList<>(10);
-        this.matrix = new Matrix();
+        shapes = new ArrayList<>(10);
+        matrix = new Matrix();
+        operationsMatrix = new Matrix();
+        curTouchPoint = new PointF();
+        prevTouchPoint = new PointF();
+        sourceRect = new RectF();
+        mappedRect = new RectF();
+        touchState = TouchState.IDLE;
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        sourceRect.set(0, 0, w, h);
     }
 
     public void addShape(Shape shape) {
@@ -54,8 +80,100 @@ public class PlaygroundView extends View {
         super.onDraw(canvas);
         canvas.concat(matrix);
         for (Shape shape : shapes) {
-            shape.draw(canvas, false);
+            shape.draw(canvas, shape == currentTouchedShape);
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        curTouchPoint.set(event.getX(), event.getY());
+        switch (event.getActionMasked()) {
+
+            case MotionEvent.ACTION_DOWN: {
+                currentTouchedShape = findShapeThatContainsCurrentTouchPoint();
+                if(currentTouchedShape == null) {
+                    touchState = TouchState.TOUCHING_BOARD;
+                } else {
+                    touchState = TouchState.TOUCHING_SHAPE;
+                }
+                prevTouchPoint.set(curTouchPoint);
+                break;
+            }
+
+            case MotionEvent.ACTION_UP: {
+                touchState = TouchState.IDLE;
+                currentTouchedShape = null;
+                break;
+            }
+
+            case MotionEvent.ACTION_CANCEL: {
+                touchState = TouchState.IDLE;
+                currentTouchedShape = null;
+                break;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                if(touchState == TouchState.TOUCHING_BOARD) {
+                    touchState = TouchState.MOVING_BOARD;
+                } else if(touchState == TouchState.TOUCHING_SHAPE) {
+                    touchState = TouchState.MOVING_SHAPE;
+                }
+                handleMove();
+                prevTouchPoint.set(curTouchPoint);
+                break;
+            }
         }
 
+        invalidate();
+        return true;
+    }
+
+    private void handleMove() {
+        switch (touchState) {
+
+            case MOVING_BOARD: {
+                handleMovingBoard();
+                break;
+            }
+
+            case MOVING_SHAPE: {
+                handleMovingShape();
+                break;
+            }
+
+            default: {
+                //No handling to do here
+                break;
+            }
+        }
+    }
+
+    private void handleMovingBoard() {
+        final float deltaX = curTouchPoint.x - prevTouchPoint.x;
+        final float deltaY = curTouchPoint.y - prevTouchPoint.y;
+        matrix.preTranslate(deltaX, deltaY);
+        invalidate();
+    }
+
+    private void handleMovingShape() {
+
+    }
+
+    private Shape findShapeThatContainsCurrentTouchPoint() {
+        for (Shape shape : shapes) {
+            if(shape.isPointInBounds(curTouchPoint)) {
+                return shape;
+            }
+        }
+        return null;
+    }
+
+    private enum TouchState {
+        IDLE,
+        TOUCHING_BOARD,
+        TOUCHING_SHAPE,
+        MOVING_BOARD,
+        MOVING_SHAPE
     }
 }

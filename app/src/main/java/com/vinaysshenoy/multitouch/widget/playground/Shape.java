@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
 
 import static com.vinaysshenoy.multitouch.Utils.dpToPx;
@@ -36,8 +37,18 @@ public abstract class Shape {
     }
 
     public final void draw(Canvas canvas, boolean isSelected) {
+        final int saveCount = canvas.save();
         canvas.concat(matrix);
         drawSelf(canvas, isSelected);
+        canvas.restoreToCount(saveCount);
+    }
+
+    public boolean isPointInBounds(PointF pointF) {
+        return bounds.contains(pointF.x, pointF.y);
+    }
+
+    public final Matrix matrix() {
+        return matrix;
     }
 
     protected abstract void drawSelf(Canvas canvas, boolean isSelected);
