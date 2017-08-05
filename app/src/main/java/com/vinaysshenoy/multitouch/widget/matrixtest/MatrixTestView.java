@@ -18,11 +18,21 @@ import static com.vinaysshenoy.multitouch.Utils.dpToPx;
 
 public class MatrixTestView extends View {
 
+    //Total drawing area available to the View
     private RectF drawRect;
+
+    //The content rect that will be drawn
+    private RectF content;
+
+    //The rect to hold the transformed content rect
+    private RectF mappedContent;
+
     private Paint contentPaint;
     private Paint centerMarkerPaint;
-    private RectF content;
+
     private float centerMarkerRadius;
+
+    //Matrix to hold the transformations
     private Matrix contentTransformMatrix;
 
     public MatrixTestView(Context context) {
@@ -49,6 +59,7 @@ public class MatrixTestView extends View {
     private void init(Context context, AttributeSet set) {
         drawRect = new RectF();
         content = new RectF();
+        mappedContent = new RectF();
 
         contentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         contentPaint.setStyle(Paint.Style.FILL);
@@ -70,10 +81,15 @@ public class MatrixTestView extends View {
         if (w > 0 && h > 0) {
             drawRect.set(0, 0, w, h);
 
+            //Initialize some value to the content rect
             content.set(drawRect);
             content.inset(w / 3, h / 3);
-            contentTransformMatrix.reset();
-            contentTransformMatrix.preTranslate(content.width() / 2, 0F);
+
+            contentTransformMatrix.preTranslate(content.width() / 2F, 0F);
+            contentTransformMatrix.preTranslate(0F, content.height() / 2F);
+
+            //Apply the matrix transform on the content rect and store it in the mapped rect
+            contentTransformMatrix.mapRect(mappedContent, content);
         }
     }
 
@@ -81,10 +97,7 @@ public class MatrixTestView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (drawRect.width() > 0F && drawRect.height() > 0F) {
-            final int saveCount = canvas.save();
-            canvas.concat(contentTransformMatrix);
-            canvas.drawRect(content, contentPaint);
-            canvas.restoreToCount(saveCount);
+            canvas.drawRect(mappedContent, contentPaint);
             canvas.drawCircle(drawRect.centerX(), drawRect.centerY(), centerMarkerRadius, centerMarkerPaint);
         }
     }
