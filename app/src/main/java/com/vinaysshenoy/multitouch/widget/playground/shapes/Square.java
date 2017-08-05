@@ -13,8 +13,8 @@ public class Square extends Shape {
 
     private final float size;
 
-    public Square(float size) {
-        super();
+    public Square(String name, float size) {
+        super(name);
         this.size = size;
         bounds.set(0F, 0F, size, size);
         drawPaint.setColor(Color.RED);

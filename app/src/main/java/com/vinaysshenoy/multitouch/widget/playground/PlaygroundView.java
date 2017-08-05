@@ -7,6 +7,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -18,6 +19,8 @@ import java.util.List;
  */
 
 public class PlaygroundView extends View {
+
+    private static final String TAG = "PlaygroundView";
 
     private List<Shape> shapes;
     private Matrix matrix;
@@ -92,9 +95,11 @@ public class PlaygroundView extends View {
 
             case MotionEvent.ACTION_DOWN: {
                 currentTouchedShape = findShapeThatContainsCurrentTouchPoint();
-                if(currentTouchedShape == null) {
+                if (currentTouchedShape == null) {
+                    Log.d(TAG, "Touching Board!");
                     touchState = TouchState.TOUCHING_BOARD;
                 } else {
+                    Log.d(TAG, "Touching Shape: " + currentTouchedShape.name);
                     touchState = TouchState.TOUCHING_SHAPE;
                 }
                 prevTouchPoint.set(curTouchPoint);
@@ -114,9 +119,9 @@ public class PlaygroundView extends View {
             }
 
             case MotionEvent.ACTION_MOVE: {
-                if(touchState == TouchState.TOUCHING_BOARD) {
+                if (touchState == TouchState.TOUCHING_BOARD) {
                     touchState = TouchState.MOVING_BOARD;
-                } else if(touchState == TouchState.TOUCHING_SHAPE) {
+                } else if (touchState == TouchState.TOUCHING_SHAPE) {
                     touchState = TouchState.MOVING_SHAPE;
                 }
                 handleMove();
@@ -161,11 +166,20 @@ public class PlaygroundView extends View {
     }
 
     private Shape findShapeThatContainsCurrentTouchPoint() {
-        for (Shape shape : shapes) {
-            if(shape.isPointInBounds(curTouchPoint)) {
+
+        //Test in reverse order because we want the ones which will be drawn on top to be tested first
+        for (int shapeIndex = shapes.size() - 1; shapeIndex >= 0; shapeIndex--) {
+            final Shape shape = shapes.get(shapeIndex);
+
+            operationsMatrix.set(matrix);
+            operationsMatrix.postConcat(shape.matrix());
+            operationsMatrix.mapRect(mappedRect, shape.bounds());
+
+            if (mappedRect.contains(curTouchPoint.x, curTouchPoint.y)) {
                 return shape;
             }
         }
+
         return null;
     }
 

@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.RectF;
 
 import static com.vinaysshenoy.multitouch.Utils.dpToPx;
@@ -15,12 +14,14 @@ import static com.vinaysshenoy.multitouch.Utils.dpToPx;
 
 public abstract class Shape {
 
+    public final String name;
     protected final RectF bounds;
     protected final Paint drawPaint;
     protected final Paint selectedPaint;
     private final Matrix matrix;
 
-    protected Shape() {
+    protected Shape(String name) {
+        this.name = name;
         bounds = new RectF();
         matrix = new Matrix();
 
@@ -43,12 +44,12 @@ public abstract class Shape {
         canvas.restoreToCount(saveCount);
     }
 
-    public boolean isPointInBounds(PointF pointF) {
-        return bounds.contains(pointF.x, pointF.y);
-    }
-
     public final Matrix matrix() {
         return matrix;
+    }
+
+    public final RectF bounds() {
+        return bounds;
     }
 
     protected abstract void drawSelf(Canvas canvas, boolean isSelected);

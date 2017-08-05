@@ -13,8 +13,8 @@ public class Circle extends Shape {
 
     private final float radius;
 
-    public Circle(float radius) {
-        super();
+    public Circle(String name, float radius) {
+        super(name);
         this.radius = radius;
         bounds.set(0F, 0F, radius * 2, radius * 2);
         drawPaint.setColor(Color.GREEN);

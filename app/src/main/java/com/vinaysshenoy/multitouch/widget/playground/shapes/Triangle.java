@@ -15,8 +15,8 @@ public class Triangle extends Shape {
     private final float lengthOfBase;
     private final Path path;
 
-    public Triangle(float lengthOfBase) {
-        super();
+    public Triangle(String name, float lengthOfBase) {
+        super(name);
         this.lengthOfBase = lengthOfBase;
         bounds.set(0F, 0F, lengthOfBase, lengthOfBase);
 
