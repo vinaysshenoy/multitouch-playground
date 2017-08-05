@@ -162,7 +162,10 @@ public class PlaygroundView extends View {
     }
 
     private void handleMovingShape() {
-
+        final float deltaX = curTouchPoint.x - prevTouchPoint.x;
+        final float deltaY = curTouchPoint.y - prevTouchPoint.y;
+        currentTouchedShape.matrix().preTranslate(deltaX, deltaY);
+        invalidate();
     }
 
     private Shape findShapeThatContainsCurrentTouchPoint() {
