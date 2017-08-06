@@ -18,6 +18,8 @@ import static com.vinaysshenoy.multitouch.Utils.dpToPx;
 
 public class MatrixTestView extends View {
 
+    private static final String TAG = "MatrixTestView";
+
     //Total drawing area available to the View
     private RectF drawRect;
 
@@ -87,6 +89,9 @@ public class MatrixTestView extends View {
 
             contentTransformMatrix.preTranslate(content.width() / 2F, 0F);
             contentTransformMatrix.preTranslate(0F, content.height() / 2F);
+
+            contentTransformMatrix.mapRect(mappedContent, content);
+            contentTransformMatrix.postScale(1.2F, 1.2F, mappedContent.left, mappedContent.top);
 
             //Apply the matrix transform on the content rect and store it in the mapped rect
             contentTransformMatrix.mapRect(mappedContent, content);
