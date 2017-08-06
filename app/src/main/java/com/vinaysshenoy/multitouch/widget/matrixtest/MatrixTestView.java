@@ -5,16 +5,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 
 import static com.vinaysshenoy.multitouch.Utils.dpToPx;
-
-/**
- * Created by vinaysshenoy on 05/08/17.
- */
 
 public class MatrixTestView extends View {
 
@@ -28,6 +25,9 @@ public class MatrixTestView extends View {
 
     //The rect to hold the transformed content rect
     private RectF mappedContent;
+
+    //The actual path to draw
+    private Path drawPath;
 
     private Paint contentPaint;
     private Paint centerMarkerPaint;
@@ -63,6 +63,8 @@ public class MatrixTestView extends View {
         content = new RectF();
         mappedContent = new RectF();
 
+        drawPath = new Path();
+
         contentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         contentPaint.setStyle(Paint.Style.FILL);
         contentPaint.setStrokeWidth(dpToPx(1.0F));
@@ -93,8 +95,12 @@ public class MatrixTestView extends View {
             contentTransformMatrix.mapRect(mappedContent, content);
             contentTransformMatrix.postScale(1.2F, 1.2F, mappedContent.left, mappedContent.top);
 
-            //Apply the matrix transform on the content rect and store it in the mapped rect
             contentTransformMatrix.mapRect(mappedContent, content);
+            contentTransformMatrix.postRotate(10F, mappedContent.left, mappedContent.top);
+
+            drawPath.reset();
+            drawPath.addRect(content, Path.Direction.CW);
+            drawPath.transform(contentTransformMatrix);
         }
     }
 
@@ -102,7 +108,7 @@ public class MatrixTestView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (drawRect.width() > 0F && drawRect.height() > 0F) {
-            canvas.drawRect(mappedContent, contentPaint);
+            canvas.drawPath(drawPath, contentPaint);
             canvas.drawCircle(drawRect.centerX(), drawRect.centerY(), centerMarkerRadius, centerMarkerPaint);
         }
     }
